@@ -91,7 +91,6 @@
 				329A46E81569704B6F6638B8 /* Pods-reactNativeExample-reactNativeExampleTests.debug.xcconfig */,
 				4DECE699DC6DDA31E8C40097 /* Pods-reactNativeExample-reactNativeExampleTests.release.xcconfig */,
 			);
-			name = Pods;
 			path = Pods;
 			sourceTree = "<group>";
 		};
@@ -485,6 +484,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 66D9ZB7HA6;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -511,6 +511,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 66D9ZB7HA6;
 				INFOPLIST_FILE = reactNativeExample/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
