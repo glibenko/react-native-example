@@ -1,115 +1,124 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * Generated with the TypeScript template
- * https://github.com/react-native-community/react-native-template-typescript
- *
- * @format
- */
-
-import React from 'react';
+import React, {useMemo, FC, useRef, useState, useEffect} from 'react';
 import {
   SafeAreaView,
-  ScrollView,
   StatusBar,
-  StyleSheet,
-  Text,
   useColorScheme,
   View,
+  StyleSheet,
+  useWindowDimensions,
+  FlatList,
+  ListRenderItemInfo,
+  NativeSyntheticEvent,
+  TextInputScrollEventData,
 } from 'react-native';
+import {ContactsList, ContactIcon, ContactInfo} from './components/index';
+import {DATA} from './consts';
+import {Data} from './types';
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-const Section: React.FC<{
-  title: string;
-}> = ({children, title}) => {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
+const App: FC = () => {
+  const mode = useColorScheme();
+  const barStyle = useMemo(
+    () => (mode === 'dark' ? 'light-content' : 'dark-content'),
+    [mode],
   );
-};
+  const {height} = useWindowDimensions();
+  const [drugble, setDrugble] = useState<null | 'top' | 'main'>(null);
+  const [selected, setSelected] = useState<null | string>(null);
+  const contactsListRef = useRef<FlatList>(null);
+  const contactsInfoRef = useRef<FlatList>(null);
 
-const App = () => {
-  const isDarkMode = useColorScheme() === 'dark';
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+  const descSize = height - 100 - 10 - 80;
+  const descSizeFull = (DATA.length - 1) * descSize;
+
+  const iconSize = 90 + 10;
+  const iconSizeFull = iconSize * (DATA.length - 4); //672 110 * 10 = 1100 / 428
+
+  useEffect(() => {
+    if (!selected) {
+      return;
+    }
+    const index = DATA.findIndex(el => el.id === selected);
+    contactsListRef?.current?.scrollToIndex({
+      animated: true,
+      index,
+      viewPosition: 0.5,
+    });
+    contactsInfoRef?.current?.scrollToIndex({animated: true, index});
+  }, [selected]);
+
+  const onScroll = ({x, y}: {x: number, y: number}) => {
+    if (drugble === 'main') {
+      const descScroll = y / descSizeFull * 100;
+      const iconScroll = iconSizeFull / 100 * descScroll;
+      contactsListRef?.current?.scrollToOffset({offset: iconScroll});
+    }
+    if (drugble === 'top') {
+      const iconScroll = x / iconSizeFull * 100;
+      const descScroll = descSizeFull / 100 * iconScroll;
+      contactsInfoRef?.current?.scrollToOffset({offset: descScroll});
+    }
   };
 
   return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={barStyle} />
+      <View style={styles.main}>
+        <ContactsList
+          data={DATA}
+          customref={contactsListRef}
+          horizontal
+          styles={styles.contactsList}
+          renderItem={({item}: ListRenderItemInfo<Data>) => (
+            <ContactIcon
+              selected={selected}
+              item={item}
+              onPress={() => setSelected(item.id)}
+            />
+          )}
+          onScroll={({
+            nativeEvent,
+          }: NativeSyntheticEvent<TextInputScrollEventData>) =>
+            drugble === 'top' && onScroll(nativeEvent.contentOffset)
+          }
+          onScrollBeginDrag={() => setDrugble('top')}
+        />
+        <ContactsList
+          data={DATA}
+          customref={contactsInfoRef}
+          renderItem={({item}: ListRenderItemInfo<Data>) => (
+            <ContactInfo
+              item={item}
+              onPress={() => setSelected(item.id)}
+              height={height - 100 - 10 - 80}
+            />
+          )}
+          onScroll={({
+            nativeEvent,
+          }: NativeSyntheticEvent<TextInputScrollEventData>) =>
+            drugble === 'main' && onScroll(nativeEvent.contentOffset)
+          }
+          onScrollBeginDrag={() => setDrugble('main')}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
+export default App;
+
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
+  container: {
+    flex: 1,
   },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
+  main: {
+    flex: 1,
+    justifyContent: 'flex-start',
   },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
+  title: {
+    fontSize: 32,
   },
-  highlight: {
-    fontWeight: '700',
+  contactsList: {
+    height: 100,
   },
 });
-
-export default App;
